@@ -19,8 +19,8 @@ Usage
 
 If no output file is specified, the C array will be sent on the standard output.
 
-    `array_name` is used to specify the name of the variable.
-    `line_len` specifies how many bytes to put per line in the output (default 80).
+- `array_name` is used to specify the name of the variable.
+- `line_len` specifies how many bytes to put per line in the output (default 80).
 
 License
 =======
