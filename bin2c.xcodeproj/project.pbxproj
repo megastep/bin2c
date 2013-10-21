@@ -28,6 +28,7 @@
 		EA1348441815E6C0002C50E3 /* bin2c */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = bin2c; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA1348471815E6C0002C50E3 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		EA1348491815E6C0002C50E3 /* bin2c.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = bin2c.1; sourceTree = "<group>"; };
+		EA1348501815F5AE002C50E3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +45,7 @@
 		EA13483B1815E6C0002C50E3 = {
 			isa = PBXGroup;
 			children = (
+				EA1348501815F5AE002C50E3 /* README.md */,
 				EA1348461815E6C0002C50E3 /* bin2c */,
 				EA1348451815E6C0002C50E3 /* Products */,
 			);

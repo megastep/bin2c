@@ -13,11 +13,11 @@
 
 static void print_usage(const char *argv0)
 {
-    fprintf(stderr, "Usage: %s -i <inputfile> [-o output.h] -a array_name\n", argv0);
+    fprintf(stderr, "Usage: %s -i <inputfile> [-o output.h] [-l line_len] -a array_name\n", argv0);
     exit(1);
 }
 
-void bin2c(const char *infile, const char *outfile, const char *array)
+void bin2c(const char *infile, const char *outfile, const char *array, int line_len)
 {
     FILE *in, *out;
     
@@ -35,7 +35,7 @@ void bin2c(const char *infile, const char *outfile, const char *array)
                 c = fgetc(in);
                 l++;
                 fprintf(out, "\\x%02x", c);
-                if ((l % 80) == 0) {
+                if ((l % line_len) == 0) {
                     fprintf(out, "\"\n\t\"");
                 }
             }
@@ -54,9 +54,10 @@ void bin2c(const char *infile, const char *outfile, const char *array)
 int main(int argc,  char * const argv[])
 {
     const char *infile = NULL, *outfile = NULL, *array = NULL;
+    int line_len = 80;
     int opt;
     
-    while( (opt = getopt(argc, argv, "i:o:a:")) != -1) {
+    while( (opt = getopt(argc, argv, "i:o:a:l:")) != -1) {
         switch (opt) {
             case 'i':
                 infile = strdup(optarg);
@@ -67,6 +68,9 @@ int main(int argc,  char * const argv[])
             case 'a':
                 array = strdup(optarg);
                 break;
+            case 'l':
+                line_len = atoi(optarg);
+                break;
             default:
                 print_usage(argv[0]);
                 break;
@@ -76,7 +80,7 @@ int main(int argc,  char * const argv[])
     if (!infile || !array) {
         print_usage(argv[0]);
     } else {
-        bin2c(infile, outfile, array);
+        bin2c(infile, outfile, array, line_len);
     }
     
     return 0;
