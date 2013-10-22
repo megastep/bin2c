@@ -15,9 +15,9 @@ The project was created in Xcode 5 on Mac OS X but the C file should compile on 
 Usage
 =====
 
-`bin2c -i <inputfile> [-o output.h] [-l line_len] -a array_name`
+`bin2c [-i inputfile] [-o output.h] [-l line_len] -a array_name`
 
-If no output file is specified, the C array will be sent on the standard output.
+If no output file is specified, the C array will be sent on the standard output. Likewise, if no input file is given, data is read from the standard input.
 
 - `array_name` is used to specify the name of the variable.
 - `line_len` specifies how many bytes to put per line in the output (default 80).

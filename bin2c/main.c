@@ -13,7 +13,7 @@
 
 static void print_usage(const char *argv0)
 {
-    fprintf(stderr, "Usage: %s -i <inputfile> [-o output.h] [-l line_len] -a array_name\n", argv0);
+    fprintf(stderr, "Usage: %s [-i inputfile] [-o output.h] [-l line_len] -a array_name\n", argv0);
     exit(1);
 }
 
@@ -21,14 +21,15 @@ void bin2c(const char *infile, const char *outfile, const char *array, int line_
 {
     FILE *in, *out;
     
-    in = fopen(infile, "rb");
+    in = infile ? fopen(infile, "rb") : stdin;
     if (in) {
         out = outfile ? fopen(outfile, "w") : stdout;
         if (out) {
             unsigned char c;
             unsigned int l = 0;
             
-            fprintf(out, "// Imported from file '%s'\n", infile);
+            if (infile)
+                fprintf(out, "// Imported from file '%s'\n", infile);
             fprintf(out, "const unsigned char %s[] = \n\t\"", array);
             
             while (!feof(in)) {
@@ -45,7 +46,8 @@ void bin2c(const char *infile, const char *outfile, const char *array, int line_
         } else {
             fprintf(stderr, "Failed to open file for writing: %s", outfile);
         }
-        fclose(in);
+        if (in != stdin)
+            fclose(in);
     } else{
         fprintf(stderr, "Failed to open file for reading: %s", infile);
     }
@@ -77,7 +79,7 @@ int main(int argc,  char * const argv[])
         }
     }
     
-    if (!infile || !array) {
+    if (!array) {
         print_usage(argv[0]);
     } else {
         bin2c(infile, outfile, array, line_len);
