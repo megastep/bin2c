@@ -11,13 +11,22 @@
 #include <string.h>
 #include <getopt.h>
 
+typedef enum
+{
+    VTChar,
+    VTNSString
+} VariableType;
+
 static void print_usage(const char *argv0)
 {
-    fprintf(stderr, "Usage: %s [-i inputfile] [-o output.h] [-l line_len] -a array_name\n", argv0);
+    fprintf(stderr,
+            "Usage: %s [-i inputfile] [-o output.h] [-l line_len] [-t type] -a var_name\n"
+            "\ttype can be: char (unsigned char array, default), nsstring (Objective-C NSString constant)\n",
+            argv0);
     exit(1);
 }
 
-void bin2c(const char *infile, const char *outfile, const char *array, int line_len)
+void bin2c(const char *infile, const char *outfile, const char *array, int line_len, VariableType vtype)
 {
     FILE *in, *out;
     
@@ -30,7 +39,11 @@ void bin2c(const char *infile, const char *outfile, const char *array, int line_
             
             if (infile)
                 fprintf(out, "// Imported from file '%s'\n", infile);
-            fprintf(out, "const unsigned char %s[] = \n\t\"", array);
+            if (vtype == VTChar) {
+                fprintf(out, "static const unsigned char %s[] = \n\t\"", array);
+            } else { // NSString
+                fprintf(out, "static const NSString *%s = \n\t@\"", array);
+            }
             
             while (!feof(in)) {
                 c = fgetc(in);
@@ -57,9 +70,10 @@ int main(int argc,  char * const argv[])
 {
     const char *infile = NULL, *outfile = NULL, *array = NULL;
     int line_len = 80;
+    VariableType vtype = VTChar;
     int opt;
     
-    while( (opt = getopt(argc, argv, "i:o:a:l:")) != -1) {
+    while( (opt = getopt(argc, argv, "i:o:a:l:t:")) != -1) {
         switch (opt) {
             case 'i':
                 infile = strdup(optarg);
@@ -73,6 +87,15 @@ int main(int argc,  char * const argv[])
             case 'l':
                 line_len = atoi(optarg);
                 break;
+            case 't':
+                if (!strcmp(optarg, "char")) {
+                    vtype = VTChar;
+                } else if (!strcmp(optarg, "nsstring")) {
+                    vtype = VTNSString;
+                } else {
+                    print_usage(argv[0]);
+                }
+                break;
             default:
                 print_usage(argv[0]);
                 break;
@@ -82,7 +105,7 @@ int main(int argc,  char * const argv[])
     if (!array) {
         print_usage(argv[0]);
     } else {
-        bin2c(infile, outfile, array, line_len);
+        bin2c(infile, outfile, array, line_len, vtype);
     }
     
     return 0;
