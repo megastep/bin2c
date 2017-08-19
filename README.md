@@ -10,12 +10,16 @@ Building
 ========
 
 The project was created in Xcode 5 on Mac OS X but the C file should compile on pretty much any system with an ANSI C compiler.
+It's also known to work on Gentoo with gcc 5.4.0.
 
 
 Usage
 =====
 
-`bin2c [-i inputfile] [-o output.h] [-l line_len] [-t type] -a array_name`
+`bin2c [-i inputfile] [-o output.h] [-l line_len] [-t type] [-hs0] -a array_name`
+-h: show a brief help message
+-s: prepend the 'static' keyword to the generated variables
+-0: when -t char, add a null-char at the end of the array
 
 If no output file is specified, the C array will be sent on the standard output. Likewise, if no input file is given, data is read from the standard input.
 
