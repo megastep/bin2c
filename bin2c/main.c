@@ -21,14 +21,16 @@ typedef struct
 {
     VariableType vtype;
     int static_keyword;
+    int null_terminate;
     int line_len;
 } OutOptions;
 
 static void print_usage(const char *argv0)
 {
     fprintf(stderr,
-            "Usage: %s [-i inputfile] [-o output.h] [-l line_len] [-t type] [-sh] -a var_name\n"
+            "Usage: %s [-i inputfile] [-o output.h] [-l line_len] [-t type] [-s0h] -a var_name\n"
             "\t-s make the generated variable static\n"
+            "\t-0 add a null-char at the end of the generated array; only valid with -t char\n"
             "\t-h show this help\n"
             "\ttype can be: char (unsigned char array, default), nsstring (Objective-C NSString constant)\n",
             argv0);
@@ -40,18 +42,28 @@ static void print_c_str (FILE* in, FILE* out, const char* array, const OutOption
     unsigned char c;
     unsigned int l = 0;
     const char* const static_str = (opts->static_keyword ? "static " : "");
+    int nullchar_printed = !opts->null_terminate;
+    int eof;
 
     fprintf(out, "%sconst unsigned char %s[] = {", static_str, array);
 
     c = fgetc(in);
-    while (!feof(in)) {
+    eof = feof(in);
+    while (!eof || !nullchar_printed) {
+        if (eof) {
+            c = 0;
+            nullchar_printed = 1;
+        }
+
         if ((l % opts->line_len) == 0) {
             fprintf(out, "\n\t");
         }
         l++;
         fprintf(out, "0x%02x", c);
         c = fgetc(in);
-        if (!feof(in)) {
+
+        eof = feof(in);
+        if (!eof || !nullchar_printed) {
             fprintf(out, ",");
         }
     }
@@ -88,15 +100,11 @@ static void print_nsstring (FILE* in, FILE* out, const char* array, const OutOpt
 void bin2c(const char *infile, const char *outfile, const char *array, const OutOptions* opts)
 {
     FILE *in, *out;
-    const char* const static_str = (opts->static_keyword ? "static " : "");
 
     in = infile ? fopen(infile, "rb") : stdin;
     if (in) {
         out = outfile ? fopen(outfile, "w") : stdout;
         if (out) {
-            unsigned char c;
-            unsigned int l = 0;
-
             if (infile)
                 fprintf(out, "// Imported from file '%s'\n", infile);
             if (opts->vtype == VTChar) {
@@ -127,8 +135,9 @@ int main(int argc,  char * const argv[])
     opts.vtype = VTChar;
     opts.static_keyword = 0;
     opts.line_len = 80;
+    opts.null_terminate = 0;
 
-    while( (opt = getopt(argc, argv, "i:o:a:l:t:sh")) != -1) {
+    while( (opt = getopt(argc, argv, "i:o:a:l:t:s0h")) != -1) {
         switch (opt) {
             case 'i':
                 infile = strdup(optarg);
@@ -150,6 +159,9 @@ int main(int argc,  char * const argv[])
                 } else {
                     print_usage(argv[0]);
                 }
+                break;
+            case '0':
+                opts.null_terminate = 1;
                 break;
             case 's':
                 opts.static_keyword = 1;
