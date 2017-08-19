@@ -55,13 +55,14 @@ void bin2c(const char *infile, const char *outfile, const char *array, const Out
                 fprintf(out, "%sconst NSString *%s = \n\t@\"", static_str, array);
             }
 
+            c = fgetc(in);
             while (!feof(in)) {
-                c = fgetc(in);
                 l++;
                 fprintf(out, "\\x%02x", c);
                 if ((l % opts->line_len) == 0) {
                     fprintf(out, "\"\n\t\"");
                 }
+                c = fgetc(in);
             }
             fprintf(out, "\";\n\n");
             if (out != stdout)
