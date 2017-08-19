@@ -35,6 +35,56 @@ static void print_usage(const char *argv0)
     exit(1);
 }
 
+static void print_c_str (FILE* in, FILE* out, const char* array, const OutOptions* opts)
+{
+    unsigned char c;
+    unsigned int l = 0;
+    const char* const static_str = (opts->static_keyword ? "static " : "");
+
+    fprintf(out, "%sconst unsigned char %s[] = {", static_str, array);
+
+    c = fgetc(in);
+    while (!feof(in)) {
+        if ((l % opts->line_len) == 0) {
+            fprintf(out, "\n\t");
+        }
+        l++;
+        fprintf(out, "0x%02x", c);
+        c = fgetc(in);
+        if (!feof(in)) {
+            fprintf(out, ",");
+        }
+    }
+    if (l) {
+        fprintf(out, "\n");
+    }
+    fprintf(out, "};\n");
+    fprintf(out, "%sconst unsigned int %s_len = %d;\n", static_str, array, l);
+}
+
+static void print_nsstring (FILE* in, FILE* out, const char* array, const OutOptions* opts)
+{
+    unsigned char c;
+    unsigned int l = 0;
+
+    if (opts->static_keyword)
+    {
+        fprintf(out, "static ");
+    }
+    fprintf(out, "const NSString *%s = \n\t@\"", array);
+
+    c = fgetc(in);
+    while (!feof(in)) {
+        l++;
+        fprintf(out, "\\x%02x", c);
+        if ((l % opts->line_len) == 0) {
+            fprintf(out, "\"\n\t\"");
+        }
+        c = fgetc(in);
+    }
+    fprintf(out, "\";\n");
+}
+
 void bin2c(const char *infile, const char *outfile, const char *array, const OutOptions* opts)
 {
     FILE *in, *out;
@@ -50,21 +100,11 @@ void bin2c(const char *infile, const char *outfile, const char *array, const Out
             if (infile)
                 fprintf(out, "// Imported from file '%s'\n", infile);
             if (opts->vtype == VTChar) {
-                fprintf(out, "%sconst unsigned char %s[] = \n\t\"", static_str, array);
+                print_c_str(in, out, array, opts);
             } else { // NSString
-                fprintf(out, "%sconst NSString *%s = \n\t@\"", static_str, array);
+                print_nsstring(in, out, array, opts);
             }
 
-            c = fgetc(in);
-            while (!feof(in)) {
-                l++;
-                fprintf(out, "\\x%02x", c);
-                if ((l % opts->line_len) == 0) {
-                    fprintf(out, "\"\n\t\"");
-                }
-                c = fgetc(in);
-            }
-            fprintf(out, "\";\n\n");
             if (out != stdout)
                 fclose(out);
         } else {
