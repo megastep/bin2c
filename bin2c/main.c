@@ -128,7 +128,6 @@ void bin2c(const char *infile, const char *outfile, const char *array, const Out
 int main(int argc,  char * const argv[])
 {
     const char *infile = NULL, *outfile = NULL, *array = NULL;
-    int line_len = 80;
     OutOptions opts;
     int opt;
 
